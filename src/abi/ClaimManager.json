@@ -1,6 +1,5 @@
 {
   "abi": [
-    // ...existing ABI content...
     {
       "inputs": [
         {
@@ -50,14 +49,9 @@
       "stateMutability": "view",
       "type": "function"
     }
-  ]
-}
+  ],
   "address": "0xYourContractAddressHere",
   "chainId": 1,
   "name": "ClaimManager"
 }
-// Note: Replace "0xYourContractAddressHere" with the actual contract address.
-// Ensure that the ABI is complete and includes all necessary functions and events.
-// This JSON structure is used to interact with the ClaimManager contract on Ethereum.
-// The getClaim function retrieves details of a specific claim by its ID.
-// The function returns the claimant's address, claim description, dispute status, resolution status, vote counts, and total staked amount.     
+
