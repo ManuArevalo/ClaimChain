@@ -1,73 +1,6 @@
 {
   "abi": [
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "initialOwner",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "string",
-          "name": "reason",
-          "type": "string"
-        }
-      ],
-      "name": "submitClaim",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "claimId",
-          "type": "uint256"
-        }
-      ],
-      "name": "disputeClaim",
-      "outputs": [],
-      "stateMutability": "payable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "claimId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool",
-          "name": "voteYes",
-          "type": "bool"
-        }
-      ],
-      "name": "voteOnClaim",
-      "outputs": [],
-      "stateMutability": "payable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "claimId",
-          "type": "uint256"
-        }
-      ],
-      "name": "resolveClaim",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
+    // ...existing ABI content...
     {
       "inputs": [
         {
@@ -118,3 +51,13 @@
       "type": "function"
     }
   ]
+}
+  "address": "0xYourContractAddressHere",
+  "chainId": 1,
+  "name": "ClaimManager"
+}
+// Note: Replace "0xYourContractAddressHere" with the actual contract address.
+// Ensure that the ABI is complete and includes all necessary functions and events.
+// This JSON structure is used to interact with the ClaimManager contract on Ethereum.
+// The getClaim function retrieves details of a specific claim by its ID.
+// The function returns the claimant's address, claim description, dispute status, resolution status, vote counts, and total staked amount.     
