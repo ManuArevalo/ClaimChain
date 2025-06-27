@@ -1,36 +1,21 @@
-// src/app/layout.tsx
-'use client'
+// app/layout.tsx or src/app/layout.tsx
 
-import './globals.css'
-import { WagmiConfig, createConfig, configureChains } from 'wagmi'
-import { sepolia } from 'wagmi/chains'
-import { publicProvider } from 'wagmi/providers/public'
-import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit'
-import '@rainbow-me/rainbowkit/styles.css'
+'use client';
 
-const { chains, publicClient } = configureChains([sepolia], [publicProvider()])
-const { connectors } = getDefaultWallets({
-  appName: 'ClaimChain',
-  projectId: 'YOUR_PROJECT_ID_FROM_WALLET_CONNECT', // Or use dummy string for now
-  chains,
-})
-
-const wagmiConfig = createConfig({
-  autoConnect: true,
-  connectors,
-  publicClient,
-})
+import { WagmiConfig } from 'wagmi';
+import { config } from '../src/wagmi.config'; // adjust path if different
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <WagmiConfig config={wagmiConfig}>
-          <RainbowKitProvider chains={chains}>
-            {children}
-          </RainbowKitProvider>
+        <WagmiConfig config={config}>
+          {children}
         </WagmiConfig>
       </body>
     </html>
-  )
+  );
 }
+// Note: Ensure that the path to wagmi.config.ts is correct based on your project structure.
+// This layout wraps your application with the WagmiConfig provider, allowing you to use Wagmi hooks and components throughout your app.
+// You can now use Wagmi hooks like useAccount, useConnect, etc., in your

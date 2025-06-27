@@ -1,13 +1,19 @@
-const { ethers } = require("hardhat");
+// scripts/deploy.js
+require("dotenv").config();
+const hre = require("hardhat");
 
 async function main() {
-  const ClaimManager = await ethers.getContractFactory("ClaimManager");
-  const claimManager = await ClaimManager.deploy();
+  const [deployer] = await hre.ethers.getSigners();
 
-  // ⛏️ Wait for the contract to finish deploying (Ethers v6+)
+  const ClaimManager = await hre.ethers.getContractFactory("ClaimManager");
+
+  // Constructor requires owner address
+  const claimManager = await ClaimManager.deploy(deployer.address);
+
+  // Wait for deployment
   await claimManager.waitForDeployment();
 
-  console.log("ClaimManager deployed to:", claimManager.target);
+  console.log("ClaimManager deployed to:", await claimManager.getAddress());
 }
 
 main().catch((error) => {

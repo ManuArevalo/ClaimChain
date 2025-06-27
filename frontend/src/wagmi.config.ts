@@ -1,9 +1,15 @@
 // src/wagmi.config.ts
-import { createConfig } from 'wagmi';
+
+import { createConfig, configureChains } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
+import { publicProvider } from 'wagmi/providers/public';
 import { metaMask } from 'wagmi/connectors';
 
-export const config = createConfig({ chains: [sepolia],
-  connectors: [metaMask()], ssr: false,
+const { chains, publicClient } = configureChains([sepolia], [publicProvider()]);
+
+export const config = createConfig({
+  autoConnect: true,
+  connectors: [metaMask()],
+  publicClient,
 });
 
