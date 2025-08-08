@@ -1,0 +1,10 @@
+{
+  "projectId": "",
+  "orgId": "",
+  "settings": {
+    "framework": "create-react-app",
+    "outputDirectory": "build",
+    "installCommand": "npm i",
+    "buildCommand": "npm run build"
+  }
+}
