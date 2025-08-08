@@ -9,6 +9,7 @@ import RewardBox from './components/RewardBox';
 import AppealBox from './components/AppealBox';
 import OpenRoundBox from './components/OpenRoundBox';
 import AdminBox from './components/AdminBox';
+import ClientEvidenceUpload from './components/ClientEvidenceUpload';
 import { getV2Contract } from './utils/Contract';
 
 function App() {
@@ -72,6 +73,7 @@ function App() {
       {role === 'client' && (
         <div style={{display:'grid', gap: 16}}>
           <SubmitClaimForm />
+          <ClientEvidenceUpload />
           <ViewClaims />
           <OpenRoundBox />
           <AppealBox />
