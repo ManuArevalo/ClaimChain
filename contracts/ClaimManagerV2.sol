@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 /**
  * ClaimManagerV2
@@ -16,8 +17,9 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
  * - Paid appeals start a new round without expensive cleanup loops
  * - Adjustable timing/parameters via owner setters
  * - Pagination helpers
+ * - EIP-712 typed evidence with expiry and URI (preferred)
  */
-contract ClaimManagerV2 is Ownable, ReentrancyGuard {
+contract ClaimManagerV2 is Ownable, ReentrancyGuard, EIP712 {
     using ECDSA for bytes32;
 
     // ------------------------- Types -------------------------
@@ -37,6 +39,7 @@ contract ClaimManagerV2 is Ownable, ReentrancyGuard {
         bool verdict; // provider's boolean opinion
         bool verified; // signature validated and provider approved
         uint256 timestamp;
+        string uri; // off-chain location for the evidence payload
     }
 
     struct VoteInfo {
@@ -98,6 +101,11 @@ contract ClaimManagerV2 is Ownable, ReentrancyGuard {
     // Anti-spam submission cooldown
     mapping(address => uint256) public lastClaimTime;
 
+    // EIP-712 Evidence TypeHash
+    bytes32 private constant EVIDENCE_TYPEHASH = keccak256(
+        "Evidence(address contractAddr,uint256 chainId,uint256 claimId,uint256 roundId,bytes32 inputTypeHash,bytes32 inputHash,bool verdict,string uri,uint256 expiresAt)"
+    );
+
     // ------------------------- Events -------------------------
 
     event ClaimSubmitted(uint256 indexed id, address indexed claimant, string reason);
@@ -106,7 +114,7 @@ contract ClaimManagerV2 is Ownable, ReentrancyGuard {
     event VoteRevealed(uint256 indexed claimId, uint256 indexed roundId, address indexed juror, bool voteYes, uint256 stake);
     event ClaimResolved(uint256 indexed claimId, uint256 indexed roundId, bool passed, bool quorumFailed, uint256 winnersTotalStake, uint256 losersPool);
     event RewardClaimed(uint256 indexed claimId, uint256 indexed roundId, address indexed juror, uint256 amount);
-    event EvidenceSubmitted(uint256 indexed claimId, uint256 indexed roundId, address indexed provider, string inputType, bool verdict);
+    event EvidenceSubmitted(uint256 indexed claimId, uint256 indexed roundId, address indexed provider, string inputType, bool verdict, string uri);
     event OracleVerdictSubmitted(uint256 indexed claimId, bool verdict);
 
     // Parameter updates
@@ -130,7 +138,10 @@ contract ClaimManagerV2 is Ownable, ReentrancyGuard {
 
     // ------------------------- Constructor -------------------------
 
-    constructor(address initialOwner, address initialTreasury) Ownable(initialOwner) {
+    constructor(address initialOwner, address initialTreasury)
+        Ownable(initialOwner)
+        EIP712("ClaimManagerV2", "1")
+    {
         treasury = initialTreasury;
     }
 
@@ -223,7 +234,56 @@ contract ClaimManagerV2 is Ownable, ReentrancyGuard {
 
     // ------------------------- Evidence -------------------------
 
-    // Signed evidence by an approved provider. Signature binds contract, chainId, claimId, inputType hash, inputHash, verdict.
+    // Preferred: EIP-712 typed evidence with expiry and URI
+    function submitEvidenceTyped(
+        uint256 claimId,
+        uint256 roundId,
+        string calldata inputType,
+        bytes32 inputHash,
+        bool verdict,
+        string calldata uri,
+        uint256 expiresAt,
+        bytes calldata signature
+    ) external claimExists(claimId) {
+        require(block.timestamp <= expiresAt, "Signature expired");
+        Claim storage c = claims[claimId];
+        require(roundId == c.currentRound, "Wrong round");
+        Round storage r = claimRounds[claimId][roundId];
+        require(!r.resolved, "Round resolved");
+
+        bytes32 typeHash = keccak256(bytes(inputType));
+        bytes32 structHash = keccak256(
+            abi.encode(
+                EVIDENCE_TYPEHASH,
+                address(this),
+                block.chainid,
+                claimId,
+                roundId,
+                typeHash,
+                inputHash,
+                verdict,
+                keccak256(bytes(uri)),
+                expiresAt
+            )
+        );
+        bytes32 digest = _hashTypedDataV4(structHash);
+        address signer = ECDSA.recover(digest, signature);
+        require(approvedProviders[signer][inputType], "Provider not approved");
+
+        r.evidences.push(EvidenceItem({
+            provider: signer,
+            inputType: inputType,
+            inputHash: inputHash,
+            verdict: verdict,
+            verified: true,
+            timestamp: block.timestamp,
+            uri: uri
+        }));
+
+        emit EvidenceSubmitted(claimId, roundId, signer, inputType, verdict, uri);
+    }
+
+    // Legacy: personal_sign evidence (kept for compatibility)
     function submitEvidenceSigned(
         uint256 claimId,
         string calldata inputType,
@@ -254,10 +314,11 @@ contract ClaimManagerV2 is Ownable, ReentrancyGuard {
             inputHash: inputHash,
             verdict: verdict,
             verified: true,
-            timestamp: block.timestamp
+            timestamp: block.timestamp,
+            uri: ""
         }));
 
-        emit EvidenceSubmitted(claimId, c.currentRound, signer, inputType, verdict);
+        emit EvidenceSubmitted(claimId, c.currentRound, signer, inputType, verdict, "");
     }
 
     // ------------------------- Oracle -------------------------
