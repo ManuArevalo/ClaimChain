@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "frontend/build" }
+    }
+  ],
+  "env": {
+    "REACT_APP_CLAIM_MANAGER_V2_ADDRESS": "",
+    "REACT_APP_BACKEND_URL": ""
+  },
+  "build": {
+    "env": {
+      "CI": "false"
+    }
+  },
+  "github": { "enabled": true },
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "installCommand": "cd frontend && npm ci",
+  "buildCommand": "cd frontend && npm run build"
+}
