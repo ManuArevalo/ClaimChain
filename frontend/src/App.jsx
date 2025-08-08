@@ -10,10 +10,12 @@ import AppealBox from './components/AppealBox';
 import OpenRoundBox from './components/OpenRoundBox';
 import AdminBox from './components/AdminBox';
 import ClientEvidenceUpload from './components/ClientEvidenceUpload';
+import WalletBar from './components/WalletBar';
 import { getV2Contract } from './utils/Contract';
 
 function App() {
   const [account, setAccount] = useState(null);
+  const [chainId, setChainId] = useState(null);
   const [role, setRole] = useState('client'); // client | juror | admin
   const [isOwner, setIsOwner] = useState(false);
   const [isProvider, setIsProvider] = useState(false);
@@ -22,6 +24,7 @@ function App() {
     const wallet = await connectWallet();
     if (wallet) {
       setAccount(wallet.account);
+      setChainId(wallet.chainId);
       await detectRoles(wallet);
     }
   };
@@ -57,18 +60,13 @@ function App() {
   return (
     <div style={{maxWidth: 900, margin: '0 auto', padding: 16}}>
       <h1>ClaimChain dApp</h1>
-      {!account ? (
-        <button onClick={handleConnect}>Connect Wallet</button>
-      ) : (
-        <div style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>
-          <p>Connected: {account}</p>
-          <div style={{display:'flex', gap: 8}}>
-            <button onClick={()=>setRole('client')}>Client</button>
-            <button onClick={()=>setRole('juror')}>Juror</button>
-            <button onClick={()=>setRole('admin')} disabled={!(isOwner || isProvider)}>Admin</button>
-          </div>
-        </div>
-      )}
+      <WalletBar account={account} chainId={chainId} onConnect={handleConnect} />
+
+      <div style={{display:'flex', gap: 8, marginBottom: 12}}>
+        <button onClick={()=>setRole('client')}>Client</button>
+        <button onClick={()=>setRole('juror')}>Juror</button>
+        <button onClick={()=>setRole('admin')} disabled={!(isOwner || isProvider)}>Admin</button>
+      </div>
 
       {role === 'client' && (
         <div style={{display:'grid', gap: 16}}>
