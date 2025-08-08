@@ -11,6 +11,7 @@ import OpenRoundBox from './components/OpenRoundBox';
 import AdminBox from './components/AdminBox';
 import ClientEvidenceUpload from './components/ClientEvidenceUpload';
 import WalletBar from './components/WalletBar';
+import { Toaster } from 'react-hot-toast';
 import { getV2Contract } from './utils/Contract';
 
 function App() {
@@ -59,6 +60,7 @@ function App() {
 
   return (
     <div style={{maxWidth: 900, margin: '0 auto', padding: 16}}>
+      <Toaster position="top-right" />
       <h1>ClaimChain dApp</h1>
       <WalletBar account={account} chainId={chainId} onConnect={handleConnect} />
 
