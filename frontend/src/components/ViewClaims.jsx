@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getContract } from "../utils/contract";
+import { getV2Contract } from "../utils/Contract";
 import { connectWallet } from "../utils/connectWallet";
 
 export default function ViewClaim() {
@@ -8,10 +8,16 @@ export default function ViewClaim() {
 
   const handleFetch = async () => {
     const wallet = await connectWallet();
-    const contract = getContract(wallet.provider);
+    if (!wallet) return;
+    const contract = getV2Contract(wallet.provider);
 
     const data = await contract.getClaim(claimId);
-    setClaimData(data);
+    setClaimData({
+      claimant: data[0],
+      description: data[1],
+      createdAt: Number(data[2]),
+      currentRound: Number(data[3])
+    });
   };
 
   return (
@@ -25,9 +31,9 @@ export default function ViewClaim() {
       <button onClick={handleFetch}>Fetch Claim</button>
       {claimData && (
         <div>
-          <p><strong>Description:</strong> {claimData[1]}</p>
-          <p><strong>Disputed:</strong> {claimData[2].toString()}</p>
-          <p><strong>Resolved:</strong> {claimData[3].toString()}</p>
+          <p><strong>Description:</strong> {claimData.description}</p>
+          <p><strong>Claimant:</strong> {claimData.claimant}</p>
+          <p><strong>Round:</strong> {claimData.currentRound}</p>
         </div>
       )}
     </div>
