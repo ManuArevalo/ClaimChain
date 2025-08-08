@@ -1,8 +1,8 @@
 import { ethers } from "ethers";
-import ClaimManagerABI from "./ClaimManagerABI.json"; // ABI file exported from Hardhat
+import ClaimManagerV2ABI from "../abi/ClaimManagerV2.abi.json";
 
-const CONTRACT_ADDRESS = "0xYourDeployedContractAddress"; // update this
+export const CLAIM_MANAGER_V2_ADDRESS = "0xYourDeployedV2Address"; // update after deploy
 
-export function getContract(signerOrProvider) {
-  return new ethers.Contract(CONTRACT_ADDRESS, ClaimManagerABI, signerOrProvider);
+export function getV2Contract(signerOrProvider) {
+  return new ethers.Contract(CLAIM_MANAGER_V2_ADDRESS, ClaimManagerV2ABI, signerOrProvider);
 }

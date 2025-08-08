@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getContract } from "../utils/contract";
+import { getV2Contract } from "../utils/Contract";
 import { connectWallet } from "../utils/connectWallet";
 
 export default function SubmitClaim() {
@@ -9,7 +9,7 @@ export default function SubmitClaim() {
     const wallet = await connectWallet();
     if (!wallet) return;
 
-    const contract = getContract(wallet.signer);
+    const contract = getV2Contract(wallet.signer);
     const tx = await contract.submitClaim(reason);
     await tx.wait();
 
